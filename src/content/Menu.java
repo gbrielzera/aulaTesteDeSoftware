@@ -46,6 +46,36 @@ public class Menu {
                 dao.inserirPais(country);
                 System.out.println("País inserido com sucesso!");
             }
+          
+            if (resp == 4) {
+                Utils.limparTela();
+                System.out.println("--- List of Registered Countries ---");
+                
+                var paises = dao.listarPaises();
+                
+                if (paises.isEmpty()) {
+                    System.out.println("No countries found.");
+                } else {
+                    for (Countries c : paises) {
+                        System.out.println(c.toString());
+                    }
+                }
+                
+                System.out.println("\nPress Enter to return to menu...");
+                sc.nextLine();
+            }
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
         conn.closeConnection(); // Fechar a conexão ao sair
         sc.close();
