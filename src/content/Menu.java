@@ -65,6 +65,38 @@ public class Menu {
                 sc.nextLine();
             }
             
+            if (resp == 2) {
+                Utils.limparTela();
+                System.out.println("--- Updating country ---");
+                
+                // Lista os países para o usuário ver os IDs disponíveis
+                var lista = dao.listarPaises();
+                for (Countries c : lista) {
+                    System.out.println(c.getId() + " - " + c.getNome());
+                }
+
+                System.out.print("\nType the updating country ID: ");
+                int id = sc.nextInt();
+                sc.nextLine(); // Limpa o buffer
+
+                Countries countryParaAtualizar = new Countries();
+                countryParaAtualizar.setId(id);
+
+                System.out.print("New name: ");
+                countryParaAtualizar.setNome(sc.nextLine());
+
+                System.out.print("New continent: ");
+                countryParaAtualizar.setContinente(sc.nextLine());
+
+                System.out.print("New traffic hand: ");
+                countryParaAtualizar.setDirecaoDaMao(sc.nextLine());
+
+                dao.atualizarPais(countryParaAtualizar);
+                
+                System.out.println("\nPress Enter to continue...");
+                sc.nextLine();
+            }
+            
             
             
             

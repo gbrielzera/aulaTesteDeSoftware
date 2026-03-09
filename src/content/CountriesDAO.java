@@ -53,7 +53,27 @@ public class CountriesDAO {
         }
         return lista;
     }
+    
+    // UPDATE
+    public void atualizarPais(Countries countries) {
+        String sql = "UPDATE countries SET nome = ?, continente = ?, direcaoDaMao = ? WHERE id = ?";
 
+        try (PreparedStatement stmt = this.conn.prepareStatement(sql)) {
+            stmt.setString(1, countries.getNome());
+            stmt.setString(2, countries.getContinente());
+            stmt.setString(3, countries.getDirecaoDaMao());
+            stmt.setInt(4, countries.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("País atualizado com sucesso!");
+            } else {
+                System.out.println("Nenhum país encontrado com o ID informado.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao atualizar país: " + e.getMessage());
+        }
+    }
 
 
 
