@@ -74,6 +74,24 @@ public class CountriesDAO {
             System.err.println("Erro ao atualizar país: " + e.getMessage());
         }
     }
+    
+    //DELETE
+ // DELETE
+    public void deletarPais(int id) {
+        String sql = "DELETE FROM countries WHERE id = ?";
+        try (PreparedStatement stmt = this.conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("País deletado com sucesso!");
+            } else {
+                System.out.println("Nenhum país encontrado com o ID: " + id);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao deletar país: " + e.getMessage());
+        }
+    }
 
 
 

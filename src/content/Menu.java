@@ -97,6 +97,25 @@ public class Menu {
                 sc.nextLine();
             }
             
+            if (resp == 3) {
+                Utils.limparTela();
+                System.out.println("--- Removing Country ---");
+                
+                var lista = dao.listarPaises();
+                for (Countries c : lista) {
+                    System.out.println(c.getId() + " - " + c.getNome());
+                }
+
+                System.out.print("\nType the ID of the country you want to remove: ");
+                int id = sc.nextInt();
+                sc.nextLine();
+
+                dao.deletarPais(id);
+                
+                System.out.println("\nPress Enter to continue...");
+                sc.nextLine();
+            }
+            
             
             
             
