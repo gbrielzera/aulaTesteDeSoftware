@@ -12,10 +12,11 @@ public class Countries {
         this.continente = continente;
         this.direcaoDaMao = direcaoDaMao;
     }
+    
 
     // Getters
 
-    public int getId() {
+	public int getId() {
         return id;
     }
 
