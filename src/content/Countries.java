@@ -6,11 +6,8 @@ public class Countries {
     private String continente;
     private String direcaoDaMao;
 
+    // Construtor padrão — campos inicializados com valores default do Java (0 e null)
     public Countries() {
-        this.id = id;
-        this.nome = nome;
-        this.continente = continente;
-        this.direcaoDaMao = direcaoDaMao;
     }
     
 

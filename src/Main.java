@@ -10,10 +10,10 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
         ConexaoDB conexao = new ConexaoDB();
-        
+
         CriarTabela criador = new CriarTabela(conexao.getConnection());
         criador.criarTabela();
-        
+
         AuthService auth = new AuthService(conexao.getConnection());
         boolean logado = false;
 
@@ -24,22 +24,22 @@ public class Main {
             String username = sc.nextLine();
             System.out.print("Password: ");
             String password = sc.nextLine();
-            
+
             if (auth.realizarLogin(username, password)) {
                 System.out.println("Login successful! Redirecting...");
                 logado = true;
-                Thread.sleep(1000); 
-                
+                Thread.sleep(1000);
+
                 Utils.limparTela();
-                Menu.exibirMenu();
+                Menu.exibirMenu(conexao); // Passa a conexão já aberta
             } else {
                 System.out.println("\n[!] Invalid credentials. Try again.");
                 System.out.println("Press Enter to continue...");
                 sc.nextLine();
             }
         }
-        
-        conexao.closeConnection();
+
+        conexao.closeConnection(); // Única conexão, fechada aqui
         sc.close();
     }
 }

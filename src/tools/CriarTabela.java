@@ -1,5 +1,7 @@
 package tools;
 
+import content.AuthService;
+
 import java.sql.Connection;
 import java.sql.Statement;
 
@@ -21,9 +23,9 @@ public class CriarTabela {
                 direcaoDaMao TEXT NOT NULL
             );
         """;
-        
+
         String sqlUsers = """
-        	    CREATE TABLE IF NOT EXISTS usuarios (
+                    CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL UNIQUE,
                 password TEXT NOT NULL
@@ -34,13 +36,15 @@ public class CriarTabela {
             Statement stmt = conn.createStatement();
             stmt.execute(sql);
             stmt.execute(sqlUsers);
-            
-            String seedUser = "INSERT OR IGNORE INTO usuarios (username, password) VALUES ('admin', '1234');";
+
+            // Senha armazenada como hash SHA-256 (não mais em texto puro)
+            String senhaHash = AuthService.hashSenha("1234");
+            String seedUser = "INSERT OR IGNORE INTO usuarios (username, password) VALUES ('admin', '" + senhaHash + "');";
             stmt.execute(seedUser);
             System.out.println("Tabela criada ou já existente.");
-           
+
         } catch (Exception e) {
             e.printStackTrace();
-        }    
+        }
     }
 }
