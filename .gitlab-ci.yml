@@ -1,0 +1,28 @@
+image: maven:3.9.6-eclipse-temurin-22
+
+stages:
+  - build
+  - test
+  - deploy
+
+build_job:
+  stage: build
+  script:
+    - mvn clean compile
+
+test_job:
+  stage: test
+  script:
+    - mvn test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+
+deploy_job:
+  stage: deploy
+  script:
+    - echo "Executando deploy automático na main..."
+  only:
+    - main
