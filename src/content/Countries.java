@@ -6,7 +6,7 @@ public class Countries {
     private String continente;
     private String direcaoDaMao;
 
-    // Construtor padrão — campos inicializados com valores default do Java (0 e null)
+    // Construtor padrão
     public Countries() {
     }
     

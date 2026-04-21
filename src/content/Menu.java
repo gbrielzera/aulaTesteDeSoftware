@@ -1,66 +1,77 @@
 package content;
 
+import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 import tools.Utils;
 import tools.ConexaoDB;
 
 public class Menu {
-    // Recebe a conexão já aberta pelo Main, evitando abrir uma segunda conexão
+
     public static void exibirMenu(ConexaoDB conn) {
         Scanner sc = new Scanner(System.in);
-        CountriesDAO dao = new CountriesDAO(conn.getConnection());
+        ICountriesDAO dao = new CountriesDAO(conn.getConnection());
+        CountryService service = new CountryService(dao);
 
-        while(true) {
+        while (true) {
             System.out.println("\nCountries Library");
             System.out.println("1- Add Country info.");
             System.out.println("2- Edit Country info.");
             System.out.println("3- Remove Country info.");
             System.out.println("4- Show country info.");
-            System.out.println("5- Leave.");
+            System.out.println("5- Search by name.");
+            System.out.println("6- Search by continent.");
+            System.out.println("7- Leave.");
             System.out.print("Choose an option: ");
 
-            int resp = sc.nextInt();
+            int resp = lerInteiro(sc);
             sc.nextLine();
 
-            if (resp == 5) {
+            if (resp == 7) {
                 Utils.limparTela();
                 System.out.println("Leaving...");
                 break;
             }
 
             if (resp == 1) {
-                Countries country = new Countries();
-
                 Utils.limparTela();
                 System.out.print("Insert a name: ");
-                country.setNome(sc.nextLine());
+                String nome = sc.nextLine().trim();
 
-                Utils.limparTela();
                 System.out.print("Insert a continent: ");
-                country.setContinente(sc.nextLine());
+                String continente = sc.nextLine().trim();
 
-                Utils.limparTela();
-                System.out.print("Insert the traffic hand: ");
-                country.setDirecaoDaMao(sc.nextLine());
+                System.out.print("Insert the traffic hand (Left/Right): ");
+                String direcao = sc.nextLine().trim();
 
-                dao.inserirPais(country);
-                System.out.println("País inserido com sucesso!");
+                service.adicionarPais(nome, continente, direcao);
             }
 
             if (resp == 4) {
                 Utils.limparTela();
                 System.out.println("--- List of Registered Countries ---");
+                List<Countries> paises = service.listarTodos();
+                exibirLista(paises);
+                System.out.println("\nPress Enter to return to menu...");
+                sc.nextLine();
+            }
 
-                var paises = dao.listarPaises();
+            if (resp == 5) {
+                Utils.limparTela();
+                System.out.print("Search by name: ");
+                String termo = sc.nextLine();
+                List<Countries> resultado = service.buscarPorNome(termo);
+                exibirLista(resultado);
+                System.out.println("\nPress Enter to return to menu...");
+                sc.nextLine();
+            }
 
-                if (paises.isEmpty()) {
-                    System.out.println("No countries found.");
-                } else {
-                    for (Countries c : paises) {
-                        System.out.println(c.toString());
-                    }
-                }
-
+            if (resp == 6) {
+                Utils.limparTela();
+                System.out.print("Search by continent: ");
+                String continente = sc.nextLine();
+                List<Countries> resultado = service.buscarPorContinente(continente);
+                exibirLista(resultado);
                 System.out.println("\nPress Enter to return to menu...");
                 sc.nextLine();
             }
@@ -68,29 +79,21 @@ public class Menu {
             if (resp == 2) {
                 Utils.limparTela();
                 System.out.println("--- Updating country ---");
-
-                var lista = dao.listarPaises();
-                for (Countries c : lista) {
-                    System.out.println(c.getId() + " - " + c.getNome());
-                }
+                List<Countries> lista = service.listarTodos();
+                exibirLista(lista);
 
                 System.out.print("\nType the updating country ID: ");
-                int id = sc.nextInt();
+                int id = lerInteiro(sc);
                 sc.nextLine();
 
-                Countries countryParaAtualizar = new Countries();
-                countryParaAtualizar.setId(id);
-
                 System.out.print("New name: ");
-                countryParaAtualizar.setNome(sc.nextLine());
-
+                String nome = sc.nextLine().trim();
                 System.out.print("New continent: ");
-                countryParaAtualizar.setContinente(sc.nextLine());
-
+                String continente = sc.nextLine().trim();
                 System.out.print("New traffic hand: ");
-                countryParaAtualizar.setDirecaoDaMao(sc.nextLine());
+                String direcao = sc.nextLine().trim();
 
-                dao.atualizarPais(countryParaAtualizar);
+                service.atualizarPais(id, nome, continente, direcao);
 
                 System.out.println("\nPress Enter to continue...");
                 sc.nextLine();
@@ -99,22 +102,50 @@ public class Menu {
             if (resp == 3) {
                 Utils.limparTela();
                 System.out.println("--- Removing Country ---");
-
-                var lista = dao.listarPaises();
-                for (Countries c : lista) {
-                    System.out.println(c.getId() + " - " + c.getNome());
-                }
+                List<Countries> lista = service.listarTodos();
+                exibirLista(lista);
 
                 System.out.print("\nType the ID of the country you want to remove: ");
-                int id = sc.nextInt();
+                int id = lerInteiro(sc);
                 sc.nextLine();
 
-                dao.deletarPais(id);
+                // Confirmação antes de excluir
+                System.out.print("Are you sure you want to remove ID " + id + "? (s/n): ");
+                String confirmacao = sc.nextLine().trim().toLowerCase();
+                if (confirmacao.equals("s") || confirmacao.equals("sim")) {
+                    service.deletarPais(id);
+                } else {
+                    System.out.println("Operação cancelada.");
+                }
 
                 System.out.println("\nPress Enter to continue...");
                 sc.nextLine();
             }
         }
         sc.close();
+    }
+
+    // Lê um inteiro com proteção contra InputMismatchException
+    private static int lerInteiro(Scanner sc) {
+        while (true) {
+            try {
+                return sc.nextInt();
+            } catch (InputMismatchException e) {
+                sc.nextLine(); // Descarta a entrada inválida
+                System.out.print("[!] Invalid input. Please enter a number: ");
+            }
+        }
+    }
+
+    // Exibe a lista de países formatada
+    private static void exibirLista(List<Countries> lista) {
+        if (lista.isEmpty()) {
+            System.out.println("No countries found.");
+        } else {
+            for (Countries c : lista) {
+                System.out.printf("[%d] %-30s | %-20s | %s%n",
+                    c.getId(), c.getNome(), c.getContinente(), c.getDirecaoDaMao());
+            }
+        }
     }
 }

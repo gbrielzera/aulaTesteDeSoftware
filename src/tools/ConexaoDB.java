@@ -1,25 +1,39 @@
 package tools;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-
+import java.util.Properties;
 
 public class ConexaoDB {
 
-    private static final String DB_FILE = "countries.db";
     private Connection connection;
 
-    public ConexaoDB() { // Construtor
-        try {
-            String url = "jdbc:sqlite:" + DB_FILE;
+    // Lê as configs do arquivo db.properties
+    private static String carregarUrlBanco() {
+        Properties props = new Properties();
+        try (InputStream input = ConexaoDB.class.getClassLoader().getResourceAsStream("db.properties")) {
+            if (input != null) {
+                props.load(input);
+            }
+        } catch (IOException e) {
+            System.err.println("Aviso: db.properties não encontrado, usando padrão.");
+        }
+        String dbFile = props.getProperty("db.file", "countries.db");
+        return "jdbc:sqlite:" + dbFile;
+    }
 
+    public ConexaoDB() {
+        try {
+            String url = carregarUrlBanco();
             connection = DriverManager.getConnection(url);
             System.out.println("Conexão com SQLite feita com sucesso!");
         } catch (SQLException e) {
             System.err.println("Erro ao conectar: " + e.getMessage());
             e.printStackTrace();
-        } 
+        }
     }
 
     public Connection getConnection() {
@@ -36,5 +50,4 @@ public class ConexaoDB {
             }
         }
     }
-
 }

@@ -8,62 +8,87 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CountriesDAO {
-    
+public class CountriesDAO implements ICountriesDAO {
+
     private Connection conn;
 
-    // Construtor
     public CountriesDAO(Connection conn) {
         this.conn = conn;
     }
 
     // CREATE
+    @Override
     public void inserirPais(Countries countries) {
         String sql = "INSERT INTO countries(nome, continente, direcaoDaMao) VALUES (?, ?, ?)";
-
         try (PreparedStatement stmt = this.conn.prepareStatement(sql)) {
             stmt.setString(1, countries.getNome());
             stmt.setString(2, countries.getContinente());
             stmt.setString(3, countries.getDirecaoDaMao());
-
             stmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Erro ao inserir país: " + e.getMessage());
         }
     }
 
-    // READ
+    // READ — todos
+    @Override
     public List<Countries> listarPaises() {
         List<Countries> lista = new ArrayList<>();
-        String sql = "SELECT * FROM countries";
-
+        String sql = "SELECT * FROM countries ORDER BY nome";
         try (Statement stmt = this.conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-
             while (rs.next()) {
-                Countries c = new Countries();
-                c.setId(rs.getInt("id"));
-                c.setNome(rs.getString("nome"));
-                c.setContinente(rs.getString("continente"));
-                c.setDirecaoDaMao(rs.getString("direcaoDaMao"));
-                lista.add(c);
+                lista.add(mapearResultSet(rs));
             }
         } catch (SQLException e) {
             System.err.println("Erro ao listar países: " + e.getMessage());
         }
         return lista;
     }
-    
+
+    // BUSCA por nome (parcial, case-insensitive)
+    @Override
+    public List<Countries> buscarPorNome(String nome) {
+        List<Countries> lista = new ArrayList<>();
+        String sql = "SELECT * FROM countries WHERE LOWER(nome) LIKE LOWER(?) ORDER BY nome";
+        try (PreparedStatement stmt = this.conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + nome + "%");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                lista.add(mapearResultSet(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar por nome: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    // BUSCA por continente (parcial, case-insensitive)
+    @Override
+    public List<Countries> buscarPorContinente(String continente) {
+        List<Countries> lista = new ArrayList<>();
+        String sql = "SELECT * FROM countries WHERE LOWER(continente) LIKE LOWER(?) ORDER BY nome";
+        try (PreparedStatement stmt = this.conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + continente + "%");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                lista.add(mapearResultSet(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar por continente: " + e.getMessage());
+        }
+        return lista;
+    }
+
     // UPDATE
+    @Override
     public void atualizarPais(Countries countries) {
         String sql = "UPDATE countries SET nome = ?, continente = ?, direcaoDaMao = ? WHERE id = ?";
-
         try (PreparedStatement stmt = this.conn.prepareStatement(sql)) {
             stmt.setString(1, countries.getNome());
             stmt.setString(2, countries.getContinente());
             stmt.setString(3, countries.getDirecaoDaMao());
             stmt.setInt(4, countries.getId());
-
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("País atualizado com sucesso!");
@@ -74,15 +99,14 @@ public class CountriesDAO {
             System.err.println("Erro ao atualizar país: " + e.getMessage());
         }
     }
-    
-    //DELETE
- // DELETE
+
+    // DELETE
+    @Override
     public void deletarPais(int id) {
         String sql = "DELETE FROM countries WHERE id = ?";
         try (PreparedStatement stmt = this.conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             int rowsAffected = stmt.executeUpdate();
-            
             if (rowsAffected > 0) {
                 System.out.println("País deletado com sucesso!");
             } else {
@@ -93,13 +117,13 @@ public class CountriesDAO {
         }
     }
 
-
-
-
-
-
-
-
-
-
+    // Mapeia um ResultSet para um objeto Countries
+    private Countries mapearResultSet(ResultSet rs) throws SQLException {
+        Countries c = new Countries();
+        c.setId(rs.getInt("id"));
+        c.setNome(rs.getString("nome"));
+        c.setContinente(rs.getString("continente"));
+        c.setDirecaoDaMao(rs.getString("direcaoDaMao"));
+        return c;
+    }
 }

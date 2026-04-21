@@ -39,7 +39,7 @@ public class Main {
             }
         }
 
-        conexao.closeConnection(); // Única conexão, fechada aqui
+        conexao.closeConnection(); // Única conexão fechada aqui
         sc.close();
     }
 }
