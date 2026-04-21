@@ -1,15 +1,39 @@
 image: maven:3.9.6-eclipse-temurin-22
 
 stages:
+  - lint
   - build
   - test
   - deploy
 
+# ── Análise de Qualidade de Código ────────────────────────────────────────────
+lint_checkstyle:
+  stage: lint
+  script:
+    - mvn checkstyle:check
+  allow_failure: true   # Não quebra o pipeline por enquanto — ajuste para false quando quiser exigir
+  artifacts:
+    when: always
+    paths:
+      - target/checkstyle-result.xml
+
+lint_pmd:
+  stage: lint
+  script:
+    - mvn pmd:check
+  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - target/pmd.xml
+
+# ── Build ──────────────────────────────────────────────────────────────────────
 build_job:
   stage: build
   script:
     - mvn clean compile
 
+# ── Testes ────────────────────────────────────────────────────────────────────
 test_job:
   stage: test
   script:
@@ -20,6 +44,7 @@ test_job:
       junit:
         - target/surefire-reports/TEST-*.xml
 
+# ── Deploy ────────────────────────────────────────────────────────────────────
 deploy_job:
   stage: deploy
   script:
