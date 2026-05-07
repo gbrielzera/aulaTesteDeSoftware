@@ -2,8 +2,6 @@ package content;
 
 import java.util.List;
 
-// Camada de serviço — separa regras de negócio do Menu
-// O Menu só chama métodos desta classe; a lógica fica aqui.
 public class CountryService {
 
     private final ICountriesDAO dao;
@@ -13,18 +11,18 @@ public class CountryService {
     }
 
     public void adicionarPais(String nome, String continente, String direcaoDaMao) {
-        if (nome == null || nome.isBlank()) {
-            System.out.println("[!] O nome do país não pode ser vazio.");
+        // Validação da HU01: Campos obrigatórios não podem ser vazios [cite: 266]
+        if (nome == null || nome.isBlank() || continente == null || continente.isBlank() || direcaoDaMao == null || direcaoDaMao.isBlank()) {
+            System.out.println("[!] Todos os campos são obrigatórios.");
             return;
         }
-        if (continente == null || continente.isBlank()) {
-            System.out.println("[!] O continente não pode ser vazio.");
+
+        // Validação da RAP001: Nome duplicado [cite: 292]
+        if (!dao.buscarPorNome(nome.trim()).isEmpty()) {
+            System.out.println("[!] Erro: Este país já está cadastrado.");
             return;
         }
-        if (direcaoDaMao == null || direcaoDaMao.isBlank()) {
-            System.out.println("[!] A direção da mão não pode ser vazia.");
-            return;
-        }
+
         Countries c = new Countries();
         c.setNome(nome.trim());
         c.setContinente(continente.trim());
@@ -45,6 +43,7 @@ public class CountryService {
         return dao.buscarPorNome(nome.trim());
     }
 
+    // MÉTODO QUE ESTAVA FALTANDO:
     public List<Countries> buscarPorContinente(String continente) {
         if (continente == null || continente.isBlank()) {
             System.out.println("[!] Digite um continente para busca.");
@@ -54,10 +53,12 @@ public class CountryService {
     }
 
     public void atualizarPais(int id, String novoNome, String novoContinente, String novaDirecao) {
+        // Validação da HU03: Campos não podem ser vazios na edição [cite: 339]
         if (novoNome == null || novoNome.isBlank()) {
             System.out.println("[!] O nome não pode ser vazio.");
             return;
         }
+        
         Countries c = new Countries();
         c.setId(id);
         c.setNome(novoNome.trim());
